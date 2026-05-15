@@ -9,7 +9,7 @@
 <p align="center">
   <a href="https://back2base.net"><strong>back2base.net</strong></a>
   &nbsp;·&nbsp;
-  <a href="https://chat.back2base.net">chat&nbsp;↗</a>
+  <a href="https://chat.back2base.net">chat</a>
   &nbsp;·&nbsp;
   <a href="https://github.com/Back2Base/oss-back2base">oss</a>
   &nbsp;·&nbsp;
@@ -20,19 +20,19 @@
 
 ---
 
-**back2base** runs [Claude&nbsp;Code](https://docs.anthropic.com/en/docs/claude-code) inside a hardened Docker container with a curated MCP bundle, an outbound egress firewall, and prompt-cache–optimized layering. One binary, one container, zero host pollution — your Claude subscription, sandboxed.
+**back2base** runs [Claude&nbsp;Code](https://docs.anthropic.com/en/docs/claude-code) inside a hardened Docker container with a curated MCP bundle, an outbound egress firewall, and prompt-cache–optimized image layering. A single binary, a single container, and no host-level dependencies — your Claude subscription, sandboxed.
 
-## Two ways to run it
+## Editions
 
-### 🚀 [back2base.net](https://back2base.net) — the hosted platform
+### [back2base.net](https://back2base.net) — hosted platform
 
-The full experience. CLI + a managed backend so your Claude Code setup follows you across machines.
+The CLI plus a managed backend, so your Claude Code environment follows you across machines.
 
-- Cross-device session memory (R2-backed, picks up where you left off)
-- Config + MCP profiles synced across devices
-- [`chat.back2base.net`](https://chat.back2base.net) — browser access, same memory stack, no install
+- Cross-device session memory backed by R2
+- Configuration and MCP profiles synchronized across devices
+- Browser client at [`chat.back2base.net`](https://chat.back2base.net) — same memory stack, no install required
 - Managed `claudeproxy` gateway with shared rate limits and observability
-- Auth0 sign-in linked to your Claude Pro / Max / Team / Enterprise subscription
+- Auth0 sign-in linked to your Claude Pro, Max, Team, or Enterprise subscription
 
 ```sh
 # macOS
@@ -50,9 +50,9 @@ back2base login      # Auth0 device flow + Claude subscription link
 back2base            # launch Claude Code in the current project
 ```
 
-### 🛠 [`oss-back2base`](https://github.com/Back2Base/oss-back2base) — the open-source slice
+### [`oss-back2base`](https://github.com/Back2Base/oss-back2base) — open-source runtime
 
-Same container runtime, same firewall, same MCP bundle — no hosted services, no account required. Build from source, run anywhere Docker runs.
+The same container runtime, firewall, and MCP bundle, without the hosted services. No account required. Builds from source and runs anywhere Docker runs.
 
 ```sh
 git clone https://github.com/Back2Base/oss-back2base
@@ -73,10 +73,10 @@ cd oss-back2base && go build -o oss-back2base .
 
 ## What's in the container
 
-- **Curated MCP bundle** — memory, sequential-thinking, brave-search, context7, lsmcp, git, fetch, sqlite, terraform, buildkite, datadog, github
-- **Network egress firewall** — `iptables` locks the container to Anthropic + an allow-listed set of endpoints
-- **Prompt cache optimization** — image layers sequenced for Anthropic's 5-minute cache TTL
-- **Your Claude subscription** — Pro / Max / Team / Enterprise — via `claude setup-token`, no API keys required
+- **Curated MCP bundle.** memory, sequential-thinking, brave-search, context7, lsmcp, git, fetch, sqlite, terraform, buildkite, datadog, and github.
+- **Network egress firewall.** `iptables` rules restrict the container to Anthropic and an allow-listed set of endpoints.
+- **Prompt cache optimization.** Image layers are sequenced for Anthropic's 5-minute cache TTL.
+- **Subscription-based auth.** Pro, Max, Team, and Enterprise accounts via `claude setup-token`; no API keys required.
 
 ## Repositories
 
@@ -90,11 +90,11 @@ cd oss-back2base && go build -o oss-back2base .
 
 ## Contributing
 
-The hosted-platform source lives in the private [`back2base`](https://github.com/Back2Base/back2base) repo by design — the build/release flow runs from there and artifacts land in the public repos above. For the OSS runtime, contribute directly to [`oss-back2base`](https://github.com/Back2Base/oss-back2base).
+The hosted-platform source resides in the private [`back2base`](https://github.com/Back2Base/back2base) repository by design; the build and release pipeline runs from there, and artifacts are published to the public repositories above. Contributions to the open-source runtime are welcome directly in [`oss-back2base`](https://github.com/Back2Base/oss-back2base).
 
-- Hosted platform questions → [discussions](https://github.com/Back2Base/back2base/discussions) · [issues](https://github.com/Back2Base/back2base/issues)
-- OSS runtime → [`oss-back2base` issues](https://github.com/Back2Base/oss-back2base/issues)
+- Hosted platform: [discussions](https://github.com/Back2Base/back2base/discussions) and [issues](https://github.com/Back2Base/back2base/issues)
+- Open-source runtime: [`oss-back2base` issues](https://github.com/Back2Base/oss-back2base/issues)
 
 ---
 
-<sub>MIT · <a href="https://back2base.net">back2base.net</a> · designed by <a href="https://github.com/ramseymcgrath">@ramseymcgrath</a></sub>
+<sub>MIT licensed. <a href="https://back2base.net">back2base.net</a>. Maintained by <a href="https://github.com/ramseymcgrath">@ramseymcgrath</a>.</sub>
