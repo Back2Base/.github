@@ -3,15 +3,13 @@
 </p>
 
 <p align="center">
-  <em>Containerized Claude Code, curated.</em>
-</p>
-
-<p align="center">
   <a href="https://back2base.net"><strong>back2base.net</strong></a>
   &nbsp;·&nbsp;
   <a href="https://chat.back2base.net">chat</a>
   &nbsp;·&nbsp;
   <a href="https://github.com/Back2Base/oss-back2base">oss</a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/Back2Base/tones-oss">tones</a>
   &nbsp;·&nbsp;
   <a href="https://github.com/Back2Base/back2base-dist/releases">releases</a>
   &nbsp;·&nbsp;
@@ -20,19 +18,23 @@
 
 ---
 
-**back2base** runs [Claude&nbsp;Code](https://docs.anthropic.com/en/docs/claude-code) inside a hardened Docker container with a curated MCP bundle, an outbound egress firewall, and prompt-cache–optimized image layering. A single binary, a single container, and no host-level dependencies — your Claude subscription, sandboxed.
+Back2Base builds tools for working with [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
 
-## Editions
+## back2base
 
-### [back2base.net](https://back2base.net) — hosted platform
+back2base runs Claude Code in a Docker container with a preconfigured set of MCP servers and an outbound firewall. It ships as a single binary and uses your existing Claude subscription. Nothing else needs to be installed on the host besides Docker.
 
-The CLI plus a managed backend, so your Claude Code environment follows you across machines.
+There are two editions.
 
-- Cross-device session memory backed by R2
-- Configuration and MCP profiles synchronized across devices
-- Browser client at [`chat.back2base.net`](https://chat.back2base.net) — same memory stack, no install required
-- Managed `claudeproxy` gateway with shared rate limits and observability
-- Auth0 sign-in linked to your Claude Pro, Max, Team, or Enterprise subscription
+### Hosted ([back2base.net](https://back2base.net))
+
+The CLI plus a backend that keeps your setup consistent across machines.
+
+- Session memory stored in R2 and shared between devices
+- Config and MCP profiles synced between devices
+- Browser client at [`chat.back2base.net`](https://chat.back2base.net) using the same memory
+- A managed `claudeproxy` gateway with shared rate limits and logging
+- Sign-in through Auth0, linked to a Claude Pro, Max, Team, or Enterprise subscription
 
 ```sh
 # macOS
@@ -46,13 +48,13 @@ echo "deb [signed-by=/usr/share/keyrings/back2base.gpg] \
   | sudo tee /etc/apt/sources.list.d/back2base.list
 sudo apt update && sudo apt install back2base
 
-back2base login      # Auth0 device flow + Claude subscription link
-back2base            # launch Claude Code in the current project
+back2base login      # sign in and link your Claude subscription
+back2base            # start Claude Code in the current directory
 ```
 
-### [`oss-back2base`](https://github.com/Back2Base/oss-back2base) — open-source runtime
+### Open source ([`oss-back2base`](https://github.com/Back2Base/oss-back2base))
 
-The same container runtime, firewall, and MCP bundle, without the hosted services. No account required. Builds from source and runs anywhere Docker runs.
+The same container, firewall, and MCP servers without the hosted services. No account needed.
 
 ```sh
 git clone https://github.com/Back2Base/oss-back2base
@@ -60,41 +62,58 @@ cd oss-back2base && go build -o oss-back2base .
 ./oss-back2base
 ```
 
-| Feature | `oss-back2base` | [back2base.net](https://back2base.net) |
+| | `oss-back2base` | Hosted |
 |---|:---:|:---:|
-| Containerized Claude Code | ✓ | ✓ |
-| Curated MCP server registry + profiles | ✓ | ✓ |
-| Outbound iptables firewall | ✓ | ✓ |
-| Starter skills + slash commands | ✓ | ✓ |
-| Managed `claudeproxy` gateway | — | ✓ |
-| Cross-device config + memory sync | — | ✓ |
-| Browser app (`chat.back2base.net`) | — | ✓ |
-| Auth0 sign-in | — | ✓ |
+| Claude Code in a container | ✓ | ✓ |
+| MCP server registry and profiles | ✓ | ✓ |
+| Outbound firewall | ✓ | ✓ |
+| Starter skills and slash commands | ✓ | ✓ |
+| `claudeproxy` gateway | | ✓ |
+| Config and memory sync | | ✓ |
+| Browser client | | ✓ |
+| Auth0 sign-in | | ✓ |
 
-## What's in the container
+### What's in the container
 
-- **Curated MCP bundle.** memory, sequential-thinking, brave-search, context7, lsmcp, git, fetch, sqlite, terraform, buildkite, datadog, and github.
-- **Network egress firewall.** `iptables` rules restrict the container to Anthropic and an allow-listed set of endpoints.
-- **Prompt cache optimization.** Image layers are sequenced for Anthropic's 5-minute cache TTL.
-- **Subscription-based auth.** Pro, Max, Team, and Enterprise accounts via `claude setup-token`; no API keys required.
+- **MCP servers:** memory, sequential-thinking, brave-search, context7, lsmcp, git, fetch, sqlite, terraform, buildkite, datadog, and github.
+- **Firewall:** `iptables` rules limit outbound traffic to Anthropic and an allowlist of other endpoints.
+- **Image layout:** layers are ordered so the parts that change least come first, which keeps Anthropic's prompt cache warm between sessions.
+- **Auth:** uses a Claude Pro, Max, Team, or Enterprise subscription through `claude setup-token`. No API key needed.
+
+## Tones
+
+[Tones](https://github.com/Back2Base/tones-oss) learns how you write from samples of your own writing and gives that to Claude over MCP, so drafts, docs, and code comments come out sounding like you instead of like a model. It runs on Cloudflare Workers, and each deployment belongs to one person: you host it on your own Cloudflare account and sign in through your own Auth0 tenant.
+
+- Add samples by hand, or run the `collect_writing` prompt to have Claude find things you've written in Slack, email, Drive, Notion, GitHub, or local files. You approve each one before it's saved.
+- Samples are grouped by register: `casual`, `professional`, `documentation`, `social`, and `general`.
+- Tones builds a style profile for each register (sentence length, punctuation, vocabulary, phrasing, and so on) and rebuilds it as samples are added or deleted.
+- `get_style_context` returns the profile plus a few matching excerpts for Claude to rewrite against. `get_comment_style` does the same for batches of code comments.
+
+```sh
+claude mcp add --transport http tones https://<your-domain>/mcp
+```
+
+Setup and deployment steps are in the [`tones-oss` README](https://github.com/Back2Base/tones-oss#readme).
 
 ## Repositories
 
-| Repo | Visibility | Role |
+| Repo | Visibility | Description |
 |---|---|---|
-| [`oss-back2base`](https://github.com/Back2Base/oss-back2base) | public | Open-source CLI + container runtime |
-| [`back2base`](https://github.com/Back2Base/back2base) | private | Hosted platform monorepo — CLI + Cloudflare Workers (landing, chat, config, proxy) |
-| [`back2base-dist`](https://github.com/Back2Base/back2base-dist) | public | Release artifacts for the hosted CLI (tarballs, `.deb`, checksums) |
+| [`oss-back2base`](https://github.com/Back2Base/oss-back2base) | public | Open-source CLI and container |
+| [`tones-oss`](https://github.com/Back2Base/tones-oss) | public | Tones MCP server for Cloudflare Workers |
+| [`back2base`](https://github.com/Back2Base/back2base) | private | Hosted platform: CLI and Cloudflare Workers (landing, chat, config, proxy) |
+| [`back2base-dist`](https://github.com/Back2Base/back2base-dist) | public | Hosted CLI release builds (tarballs, `.deb`, checksums) |
 | [`homebrew-back2base`](https://github.com/Back2Base/homebrew-back2base) | public | Homebrew tap |
-| [`apt-back2base`](https://github.com/Back2Base/apt-back2base) | public | APT repo + signed `Release` metadata |
+| [`apt-back2base`](https://github.com/Back2Base/apt-back2base) | public | APT repository |
 
 ## Contributing
 
-The hosted-platform source resides in the private [`back2base`](https://github.com/Back2Base/back2base) repository by design; the build and release pipeline runs from there, and artifacts are published to the public repositories above. Contributions to the open-source runtime are welcome directly in [`oss-back2base`](https://github.com/Back2Base/oss-back2base).
+Source for the hosted platform is private. Releases are built there and published to the public repos above. Pull requests for `oss-back2base` and `tones-oss` are welcome.
 
 - Hosted platform: [discussions](https://github.com/Back2Base/back2base/discussions) and [issues](https://github.com/Back2Base/back2base/issues)
-- Open-source runtime: [`oss-back2base` issues](https://github.com/Back2Base/oss-back2base/issues)
+- `oss-back2base`: [issues](https://github.com/Back2Base/oss-back2base/issues)
+- `tones-oss`: [issues](https://github.com/Back2Base/tones-oss/issues)
 
 ---
 
-<sub>MIT licensed. <a href="https://back2base.net">back2base.net</a>. Maintained by <a href="https://github.com/ramseymcgrath">@ramseymcgrath</a>.</sub>
+<sub>MIT licensed. Maintained by <a href="https://github.com/ramseymcgrath">@ramseymcgrath</a>.</sub>
